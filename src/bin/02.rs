@@ -6,37 +6,41 @@ pub fn part_one(input: &str) -> Option<i32> {
     for report in reports{
         let levels_num : Result<Vec<i32>, _> = report.split(" ").map(|x| x.parse()).collect();
         // println!("{:?}", levels_num);
-        let mut increase = false;
-        let first_level = levels_num.as_ref().unwrap()[0];
-        let second_level = levels_num.as_ref().unwrap()[1];
-        // println!("first: {}, second: {}", first_level, second_level);
-        if second_level - first_level > 0 {
-            increase = true;
-            // println!("increasing");
-        } else if second_level - first_level < 0 {
-            increase = false;
-            // println!("decreasing");
-        } else {
-            continue;
-        }
-        let mut previous_level = first_level;
-        let mut counter = 1;
+        let mut increase = None;
+        let mut previous_level = levels_num.as_ref().unwrap()[0];
+        let mut success = true;
         for level in &levels_num.as_ref().unwrap()[1..]{
-            if increase && level > &previous_level && level - previous_level >= 1 && level - previous_level <= 3{
-                previous_level = *level;
-                counter += 1;
-                if counter == levels_num.as_ref().unwrap().len(){
-                    sum_safe += 1;
+            if increase.is_some_and(|x| x ) {
+                if level - previous_level >= 1 && level - previous_level <= 3 {
+                    previous_level = *level;
                 }
-            } else if !increase && level < &previous_level && level - previous_level <= -1 && level - previous_level >= -3{
-                previous_level = *level;
-                counter += 1;
-                if counter == levels_num.as_ref().unwrap().len(){
-                    sum_safe += 1;
+                else {
+                    success = false;
+                    break;
                 }
-            } else {
-                continue;
+            } else if increase.is_some_and(|x| !x){
+                if level - previous_level <= -1 && level - previous_level >= -3 {
+                    previous_level = *level;
+                } else {
+                    success = false;
+                    break;
+                }
             }
+            if increase.is_none() {
+                if level - previous_level > 0 {
+                    increase = Some(true);
+                    previous_level = *level;
+                } else if level - previous_level < 0 {
+                    increase = Some(false);
+                    previous_level = *level;
+                } else {
+                    success = false;
+                    break;
+                }
+            }
+        }
+        if success {
+            sum_safe += 1;
         }
     }
     Some(sum_safe)
@@ -86,7 +90,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                     }
                 }
                 else {
-                    println!("{:?}", levels_num.as_ref().unwrap());
+                    // println!("{:?}", levels_num.as_ref().unwrap());
                     break;
                 }
             }
@@ -107,7 +111,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                         sum_safe += 1;
                     }
                 } else if used_dampener{
-                    println!("{:?}", levels_num.as_ref().unwrap());
+                    // println!("{:?}", levels_num.as_ref().unwrap());
                     break;
                 } else {
                     used_dampener = true;
