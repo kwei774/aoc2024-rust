@@ -1,46 +1,32 @@
 advent_of_code::solution!(2);
 
+pub fn safe_level(input: &Vec<i32>) -> bool {
+    let mut levels_ascending = input.clone();
+    levels_ascending.sort();
+    let mut levels_descending = levels_ascending.clone();
+    levels_descending.reverse();
+    if &levels_ascending != input && &levels_descending != input {
+        return false;
+    }
+    let mut previous_level = input[0];
+    for level in &input[1..]{
+        if (level - previous_level).abs() >= 1 && (level - previous_level).abs() <= 3 {
+            previous_level = *level;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
 pub fn part_one(input: &str) -> Option<i32> {
     let mut sum_safe = 0;
     let reports: Vec<&str> = input.split('\n').collect();
     for report in reports{
-        let levels_num : Result<Vec<i32>, _> = report.split(" ").map(|x| x.parse()).collect();
-        // println!("{:?}", levels_num);
-        let mut increase = None;
-        let mut previous_level = levels_num.as_ref().unwrap()[0];
-        let mut success = true;
-        for level in &levels_num.as_ref().unwrap()[1..]{
-            if increase.is_some_and(|x| x ) {
-                if level - previous_level >= 1 && level - previous_level <= 3 {
-                    previous_level = *level;
-                }
-                else {
-                    success = false;
-                    break;
-                }
-            } else if increase.is_some_and(|x| !x){
-                if level - previous_level <= -1 && level - previous_level >= -3 {
-                    previous_level = *level;
-                } else {
-                    success = false;
-                    break;
-                }
-            }
-            if increase.is_none() {
-                if level - previous_level > 0 && level - previous_level >= 1 && level - previous_level <= 3{
-                    increase = Some(true);
-                    previous_level = *level;
-                } else if level - previous_level < 0 && level - previous_level <= -1 && level - previous_level >= -3{
-                    increase = Some(false);
-                    previous_level = *level;
-                } else {
-                    success = false;
-                    break;
-                }
-            }
-        }
-        if success {
-            // println!("{:?}", levels_num.as_ref().unwrap());
+        let levels_result : Result<Vec<i32>, _> = report.split(" ").map(|x| x.parse::<i32>()).collect();
+        
+        if safe_level(levels_result.as_ref().unwrap()) {
+            // println!("{:?}", levels_result.as_ref().unwrap());
             sum_safe += 1;
         }
     }
@@ -51,75 +37,18 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut sum_safe = 0;
     let reports: Vec<&str> = input.split('\n').collect();
     for report in reports{
-        let levels_num : Result<Vec<i32>, _> = report.split(" ").map(|x| x.parse()).collect();
-        // println!("{:?}", levels_num);
-        let mut increase = false;
-        let first_level = levels_num.as_ref().unwrap()[0];
-        let second_level = levels_num.as_ref().unwrap()[1];
-        let third_level = levels_num.as_ref().unwrap()[2];
-        let mut used_dampener = false;
-        // println!("first: {}, second: {}", first_level, second_level);
-        if second_level - first_level > 0 {
-            increase = true;
-        } else if second_level - first_level < 0 {
-            increase = false;
-        } else if third_level - first_level > 0 {
-            increase = true;
-            used_dampener = true;
-        } else if third_level - first_level < 0 {
-            increase = false;
-            used_dampener = true;
+        let levels_result : Result<Vec<i32>, _> = report.split(" ").map(|x| x.parse::<i32>()).collect();
+        
+        if safe_level(levels_result.as_ref().unwrap()) {
+            // println!("{:?}", levels_result.as_ref().unwrap());
+            sum_safe += 1;
         } else {
-            continue;
-        }
-        let mut previous_level = first_level;
-        let mut counter = 1;
-        if used_dampener{
-            counter += 1;
-            for level in &levels_num.as_ref().unwrap()[2..]{
-                if increase && level > &previous_level && level - previous_level >= 1 && level - previous_level <= 3{
-                    previous_level = *level;
-                    counter += 1;
-                    if counter == levels_num.as_ref().unwrap().len(){
-                        sum_safe += 1;
-                    }
-                } else if !increase && level < &previous_level && level - previous_level <= -1 && level - previous_level >= -3{
-                    previous_level = *level;
-                    counter += 1;
-                    if counter == levels_num.as_ref().unwrap().len(){
-                        sum_safe += 1;
-                    }
-                }
-                else {
-                    // println!("{:?}", levels_num.as_ref().unwrap());
+            for i in 0..levels_result.as_ref().unwrap().len(){
+                let mut brute_force_vector = levels_result.as_ref().unwrap().clone();
+                brute_force_vector.remove(i);
+                if safe_level(&brute_force_vector){
+                    sum_safe += 1;
                     break;
-                }
-            }
-
-        }
-        else {
-            for level in &levels_num.as_ref().unwrap()[1..]{
-                if increase && level > &previous_level && level - previous_level >= 1 && level - previous_level <= 3{
-                    previous_level = *level;
-                    counter += 1;
-                    if counter == levels_num.as_ref().unwrap().len(){
-                        sum_safe += 1;
-                    }
-                } else if !increase && level < &previous_level && level - previous_level <= -1 && level - previous_level >= -3{
-                    previous_level = *level;
-                    counter += 1;
-                    if counter == levels_num.as_ref().unwrap().len(){
-                        sum_safe += 1;
-                    }
-                } else if used_dampener{
-                    // println!("{:?}", levels_num.as_ref().unwrap());
-                    break;
-                } else {
-                    used_dampener = true;
-                    counter += 1;
-                    if counter == levels_num.as_ref().unwrap().len(){
-                        sum_safe += 1;
-                    }
                 }
             }
         }
