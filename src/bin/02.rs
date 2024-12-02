@@ -27,10 +27,10 @@ pub fn part_one(input: &str) -> Option<i32> {
                 }
             }
             if increase.is_none() {
-                if level - previous_level > 0 {
+                if level - previous_level > 0 && level - previous_level >= 1 && level - previous_level <= 3{
                     increase = Some(true);
                     previous_level = *level;
-                } else if level - previous_level < 0 {
+                } else if level - previous_level < 0 && level - previous_level <= -1 && level - previous_level >= -3{
                     increase = Some(false);
                     previous_level = *level;
                 } else {
@@ -40,6 +40,7 @@ pub fn part_one(input: &str) -> Option<i32> {
             }
         }
         if success {
+            // println!("{:?}", levels_num.as_ref().unwrap());
             sum_safe += 1;
         }
     }
@@ -123,7 +124,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             }
         }
     }
-    println!("{}", sum_safe);
+    // println!("{}", sum_safe);
     Some(sum_safe)
 }
 
